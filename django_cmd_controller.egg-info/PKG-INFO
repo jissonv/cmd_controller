@@ -1,0 +1,84 @@
+Metadata-Version: 1.1
+Name: django-cmd-controller
+Version: 0.1
+Summary: A Django app to resistrict custom management command execution.
+Home-page: https://medium.com/@jissonv/context-manager-in-python-f7ea0e70c176
+Author: Jisson Varghese
+Author-email: jissonv@gmail.com
+License: BSD-3-Clause
+Description: Cmd Controller
+        =====
+         cmd_controller is a Django app to help run the custom management command in a more convenient way,
+        Most of the time during deployment, develpers need to run some django management scripts,
+        some script need to run only once and some need to run again and again.
+        Running some scripts again and again may corrupt the application. The cmd_controller help to mark a script reentrant,
+        while during the creation of the script and skips the scripts which are not reentrant.
+        
+        
+        Quick start
+        -----------
+        
+        1. Add "cmd_controller" to your INSTALLED_APPS setting like this::
+        
+            INSTALLED_APPS = [
+                ...
+                'cmd_controller',
+            ]
+        
+        2. Run ``python manage.py migrate`` to create the cmd_controller models.
+        
+        3. How to use it.
+           import cmd_utils import check_command in your custom django command, and decerate the handle
+           method and pass the script name as first parameter and Boolean value as second parameter. Pass True if the
+           script can run again and again(reentrant), False for scripts run only once.
+        
+           >> @check_command(os.path.basename(__file__).split(".")[0], <True>)  # need to run scripts multiple times
+           >> @check_command(os.path.basename(__file__).split(".")[0], <False>) # should run only once.
+        
+        
+        app/management/commands/<custom_command.py>
+        # if the script should run only once.
+        
+        import os
+        from django.core.management.base import BaseCommand
+        from cmd_controller.cmd_utils import check_command
+        
+        
+        class Command(BaseCommand):
+            help = 'test custom command'
+        
+            @check_command(os.path.basename(__file__).split(".")[0], False)
+            def handle(self, *args, **options):
+                # your custom command logic
+        
+        
+        # if the script is reentrant
+        
+        class Command(BaseCommand):
+            help = 'test custom command'
+        
+            @check_command(os.path.basename(__file__).split(".")[0], True)
+            def handle(self, *args, **options):
+                # your custom command logic
+        
+        # run the script
+        >> python manage.py custom_command.py
+        
+        
+        
+        
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 2.2  # Replace "X.Y" as appropriate
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
